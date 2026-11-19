@@ -1,0 +1,44 @@
+from PERSONAL_DATA import VK_TOKEN, GROUP_ID
+import vk_api
+from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
+from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+
+def send_message(peer_id, text):
+    vk.message.send(
+        peer_id=peer_id,
+        massage=text,
+        keyboard=keyboard.get_keyboard()
+    )
+
+def get_answer(text):
+    text = text.lower().strip()
+
+    if text == "начать тренировку":
+        return "Тренировка начата!"
+    elif text == "статистика":
+        return "Тренировка начата!"
+    elif text == "ваши данные":
+        return "Ваши данные будут скоро загруженны!"
+    else:
+        return "Команда не найдена!"
+
+vk_session = vk_api.VkApi(token=VK_TOKEN)
+vk = vk_session.get_api()
+longpoll = VkBotLongPoll(vk_session, GROUP_ID)
+
+keyboard = VkKeyboard(one_time=False)
+keyboard.add_button("начать тренировку", color=VkKeyboardColor.PRIMARY)
+keyboard.add_button("статистика", color=VkKeyboardColor.POSITIVE)
+keyboard.add_button("ваши данные", color=VkKeyboardColor.SECONDARY)
+
+for event in longpoll.listen():
+    if event.type == VkBotEventType.MESSAGE_NEW:
+        print("New massage!")
+
+        message = event.obj.message
+
+        text = message["text"]
+        peer_id = message["peer_id"]
+
+        answer_text = get_answer(text)
+        send_message(peer_id, answer_text)
